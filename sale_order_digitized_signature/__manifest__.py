@@ -3,9 +3,10 @@
 
 {
     "name": "Sale Order Digitized Signature",
+    "summary": "Capture customer signature on the sales order",
     "version": "12.0.1.0.0",
     "author": "Tecnativa, "
-               "Odoo Community Association (OCA)",
+              "Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/sale-workflow",
     "category": "Sales",
     "license": "AGPL-3",
