@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <odoo>
 
     <!-- Inherited stock location form view -->
@@ -8,9 +6,11 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
-                    <field name="returned"/>
-                    <field name="returned_product_id" attrs="{'required':[('returned','=',True)], 'invisible':[('returned','=',False)]}"/>
+            <xpath expr="//group[@name='group_lots_and_weight']"
+                   position="inside">
+                <field name="returnable"/>
+                <field name="return_product_id"
+                       attrs="{'required': [('returnable', '=', True)], 'invisible': [('returnable', '=', False)]}"/>
             </xpath>
         </field>
     </record>
