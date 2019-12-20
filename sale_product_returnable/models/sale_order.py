@@ -7,25 +7,26 @@ from odoo import api, models, _
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    def _prepare_return_picking_values(self, picking_id):
-        return_type_id = picking_id.picking_type_id.return_picking_type_id
+    def _prepare_return_picking_values(self, picking):
+        return_type_id = picking.picking_type_id.return_picking_type_id
         return {
             'move_lines': [],
             'picking_type_id': return_type_id.id,
             'state': 'draft',
-            'origin': _("Return of %s") % picking_id.name,
-            'location_id': picking_id.location_dest_id.id,
-            'location_dest_id': return_type_id and
-                                return_type_id.default_location_dest_id.id,
+            'origin': _("Return of %s") % picking.name,
+            'location_id': picking.location_dest_id.id,
+            'location_dest_id':
+                return_type_id and
+                return_type_id.default_location_dest_id.id,
             'move_ids_without_package': [],
         }
 
-    def _prepare_return_move_values(self, sale_order_line_id):
+    def _prepare_return_move_values(self, sale_order_line):
         return {
-            'product_id': sale_order_line_id.product_id.return_product_id.id,
-            'name': sale_order_line_id.product_id.return_product_id.name,
-            'product_uom_qty': sale_order_line_id.product_uom_qty,
-            'product_uom': sale_order_line_id.product_id.uom_id.id,
+            'product_id': sale_order_line.product_id.return_product_id.id,
+            'name': sale_order_line.product_id.return_product_id.name,
+            'product_uom_qty': sale_order_line.product_uom_qty,
+            'product_uom': sale_order_line.product_id.uom_id.id,
         }
 
     @api.multi

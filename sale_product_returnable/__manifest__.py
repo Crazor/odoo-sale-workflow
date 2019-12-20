@@ -17,6 +17,5 @@
     'data': [
         'views/product_template_view.xml',
     ],
-    'appplication': False,
-    'maintainers': ['max3903'],
+    'application': False,
 }
