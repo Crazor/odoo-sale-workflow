@@ -32,13 +32,13 @@ class SaleOrder(models.Model):
     @api.multi
     def action_confirm(self):
         """Action Confirm.
-
-        This method is used to create returnpicking when confirm sale order.
+        Create return pickings when confirming sale orders.
         """
         res = super(SaleOrder, self).action_confirm()
         for order in self:
             picking_id = order.picking_ids and order.picking_ids[0]
             new_picking_vals = order._prepare_return_picking_values(picking_id)
+            has_return = False
             for line in order.order_line:
                 if line.product_id and line.product_id.returnable:
                     new_move_vals = self._prepare_return_move_values(line)
@@ -46,10 +46,13 @@ class SaleOrder(models.Model):
                         'move_ids_without_package': [(
                             0, 0, new_move_vals)]
                     }
-            new_picking = picking_id.copy(new_picking_vals)
-            new_picking.message_post_with_view(
-                'mail.message_origin_link',
-                values={
-                    'self': new_picking, 'origin': picking_id},
-                subtype_id=self.env.ref('mail.mt_note').id)
+                    has_return = True
+            # if we have at least one returnable item, create the return
+            if (has_return):
+                new_picking = picking_id.copy(new_picking_vals)
+                new_picking.message_post_with_view(
+                    'mail.message_origin_link',
+                    values={
+                        'self': new_picking, 'origin': picking_id},
+                    subtype_id=self.env.ref('mail.mt_note').id)
         return res
