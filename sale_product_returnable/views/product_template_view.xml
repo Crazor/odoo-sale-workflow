@@ -10,7 +10,8 @@
                    position="inside">
                 <field name="returnable"/>
                 <field name="return_product_id"
-                       attrs="{'required': [('returnable', '=', True)], 'invisible': [('returnable', '=', False)]}"/>
+                       attrs="{'required': [('returnable', '=', True)],
+                               'invisible': [('returnable', '=', False)]}"/>
             </xpath>
         </field>
     </record>
