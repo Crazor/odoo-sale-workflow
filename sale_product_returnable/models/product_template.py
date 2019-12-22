@@ -8,6 +8,6 @@ from odoo import fields, models
 class ProductTempleate(models.Model):
     _inherit = "product.template"
 
-    returned = fields.Boolean('Can be Returned?')
-    returned_product_id = fields.Many2one(
+    returnable = fields.Boolean('Can be Returned?')
+    return_product_id = fields.Many2one(
         'product.product', 'Returned Product')
