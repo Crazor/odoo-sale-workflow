@@ -43,26 +43,28 @@ class SaleOrder(models.Model):
             res = super(SaleOrder, order).action_confirm()
             picking = order.picking_ids.filtered(
                 lambda picking: picking.location_dest_id ==
-                                order.partner_id.property_stock_customer)[0]
-            new_picking_vals = order._prepare_return_picking_values(picking)
-            has_return = False
-            for line in order.order_line:
-                if line.product_id and line.product_id.returnable:
-                    new_move_vals = self._prepare_return_move_values(line)
-                    new_picking_vals.update({
-                        'move_ids_without_package':
-                            [(0, 0, new_move_vals)]
-                    })
-                    has_return = True
-            # if we have at least one returnable item, create the return
-            if has_return:
-                new_picking = \
-                    self.env['stock.picking'].create(new_picking_vals)
-                new_picking.message_post_with_view(
-                    'mail.message_origin_link',
-                    values={
-                        'self': new_picking, 'origin': self},
-                    subtype_id=self.env.ref('mail.mt_note').id)
-                new_picking.action_confirm()
-                new_picking.action_assign()
+                order.partner_id.property_stock_customer)[0] or False
+            if picking:
+                new_picking_vals = \
+                    order._prepare_return_picking_values(picking)
+                has_return = False
+                for line in order.order_line:
+                    if line.product_id and line.product_id.returnable:
+                        new_move_vals = self._prepare_return_move_values(line)
+                        new_picking_vals.update({
+                            'move_ids_without_package':
+                                [(0, 0, new_move_vals)]
+                        })
+                        has_return = True
+                # if we have at least one returnable item, create the return
+                if has_return:
+                    new_picking = \
+                        self.env['stock.picking'].create(new_picking_vals)
+                    new_picking.message_post_with_view(
+                        'mail.message_origin_link',
+                        values={
+                            'self': new_picking, 'origin': self},
+                        subtype_id=self.env.ref('mail.mt_note').id)
+                    new_picking.action_confirm()
+                    new_picking.action_assign()
             return res
