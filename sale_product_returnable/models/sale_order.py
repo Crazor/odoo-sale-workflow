@@ -41,10 +41,11 @@ class SaleOrder(models.Model):
         """
         for order in self:
             res = super(SaleOrder, order).action_confirm()
-            picking = order.picking_ids.filtered(
+            pickings = order.picking_ids.filtered(
                 lambda picking: picking.location_dest_id ==
-                order.partner_id.property_stock_customer)[0] or False
-            if picking:
+                order.partner_id.property_stock_customer)
+            if pickings and pickings[0]:
+                picking = pickings[0]
                 new_picking_vals = \
                     order._prepare_return_picking_values(picking)
                 has_return = False
