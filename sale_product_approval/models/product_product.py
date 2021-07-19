@@ -25,26 +25,26 @@ class ProductTemplate(models.Model):
                 product.sale_ok = (
                     product.candidate_sale and product.product_state_id.approved_sale
                 )
+                if not product.sale_ok:
+                    product_variant_ids = (
+                        self.env["product.product"]
+                        .search([("product_tmpl_id", "=", product.id)])
+                        .ids
+                    )
+                    order_ids = (
+                        self.env["sale.order.line"]
+                        .search(
+                            [
+                                ("product_id", "in", product_variant_ids),
+                                ("state", "in", ["draft", "sent"]),
+                            ]
+                        )
+                        .mapped("order_id")
+                    )
+                    self.env["sale.order"]._log_product_state(order_ids, self)
 
     @api.model
     def _get_default_product_state_id(self):
         return self.env.ref(
             "product_state.product_state_draft", raise_if_not_found=False
         )
-
-
-class ProductProduct(models.Model):
-    _inherit = "product.product"
-
-    def write(self, vals):
-        res = super(ProductProduct, self).write(vals)
-        if not vals.get("sale_ok"):
-            order_ids = (
-                self.env["sale.order.line"]
-                .search(
-                    [("product_id", "=", self.id), ("state", "in", ["draft", "sent"])]
-                )
-                .mapped("order_id")
-            )
-            self.env["sale.order"]._log_product_state(order_ids, self)
-        return res
