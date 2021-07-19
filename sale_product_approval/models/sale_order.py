@@ -3,7 +3,8 @@
 
 from datetime import date
 
-from odoo import SUPERUSER_ID, fields, models
+from odoo import SUPERUSER_ID, _, fields, models
+from odoo.exceptions import UserError
 
 
 class SaleOrderLine(models.Model):
@@ -20,15 +21,15 @@ class SaleOrderLine(models.Model):
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    exceptions = fields.Boolean(
+    exceptions_sale_approval = fields.Boolean(
         compute="_compute_exceptions",
         string="Exception",
     )
 
     def _compute_exceptions(self):
-        self.exceptions = False
+        self.exceptions_sale_approval = False
         if any(not line.approved_sale for line in self.order_line):
-            self.exceptions = True
+            self.exceptions_sale_approval = True
 
     def _log_exception_activity_sale(self, render_method, documents, product_id):
         for order in documents:
@@ -50,3 +51,15 @@ class SaleOrder(models.Model):
         self.env["sale.order"]._log_exception_activity_sale(
             _render_product_state_excep, documents, product_id
         )
+
+    def action_confirm(self):
+        res = super(SaleOrder, self).action_confirm()
+        for sale in self:
+            if sale.exceptions_sale_approval:
+                raise UserError(
+                    _(
+                        "You can not confirm this sale order "
+                        "because some products are not sellable in this order."
+                    )
+                )
+        return res

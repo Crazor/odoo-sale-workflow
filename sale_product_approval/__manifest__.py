@@ -20,4 +20,5 @@
         "views/sale_order.xml",
         "views/product_exception.xml",
     ],
+    "post_init_hook": "_set_candidate_sale",
 }

@@ -16,9 +16,9 @@
                 <field invisible="1" name="approved_sale" />
             </xpath>
             <div name="button_box" position="after">
-                <field invisible="1" name="exceptions" />
+                <field invisible="1" name="exceptions_sale_approval" />
                 <div
-                    attrs="{'invisible':[('exceptions','=',False)]}"
+                    attrs="{'invisible':[('exceptions_sale_approval','=',False)]}"
                     class="alert alert-warning text-center"
                     role="alert"
                 >Exception: A product on this sale order has been marked as not saleable.</div>

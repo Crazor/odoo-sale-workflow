@@ -7,16 +7,24 @@ from odoo import api, fields, models
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    sale_ok = fields.Boolean("Can be Sold", default=False)
+    sale_ok = fields.Boolean(
+        compute="_compute_sale_ok_product",
+        string="Can be Sold",
+        default=False,
+        store=True,
+    )
     candidate_sale = fields.Boolean(
         string="Candidate to be Sold",
+        default=True,
     )
 
-    @api.onchange("product_state_id")
-    def _onchange_product_state(self):
-        self.sale_ok = False
-        if self.product_state_id.approved_sale and self.candidate_sale:
-            self.sale_ok = True
+    @api.depends("product_state_id")
+    def _compute_sale_ok_product(self):
+        for product in self:
+            if product.product_state_id:
+                product.sale_ok = (
+                    product.candidate_sale and product.product_state_id.approved_sale
+                )
 
     @api.model
     def _get_default_product_state_id(self):
@@ -40,9 +48,3 @@ class ProductProduct(models.Model):
             )
             self.env["sale.order"]._log_product_state(order_ids, self)
         return res
-
-    @api.onchange("product_state_id")
-    def _onchange_product_state(self):
-        self.sale_ok = False
-        if self.product_state_id.approved_sale and self.candidate_sale:
-            self.sale_ok = True
