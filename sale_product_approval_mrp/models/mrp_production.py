@@ -3,7 +3,8 @@
 
 from datetime import date
 
-from odoo import SUPERUSER_ID, api, fields, models
+from odoo import SUPERUSER_ID, _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class MRPProduction(models.Model):
@@ -48,6 +49,30 @@ class MRPProduction(models.Model):
         return self.env.ref(
             "sale_product_approval_mrp.exception_on_mrp_production"
         )._render(values=values)
+
+    def action_confirm(self):
+        res = super(MRPProduction, self).action_confirm()
+        for mo in self:
+            if mo.mo_line_exceptions or mo.bom_mo_exception:
+                raise UserError(
+                    _(
+                        "You can not confirm this manufacturing order "
+                        "because some products are not allowed in this order."
+                    )
+                )
+        return res
+
+    def button_mark_done(self):
+        res = super(MRPProduction, self).button_mark_done()
+        for mo in self:
+            if mo.mo_line_exceptions or mo.bom_mo_exception:
+                raise UserError(
+                    _(
+                        "You can not mark done because some products are not "
+                        "allowed in this order."
+                    )
+                )
+        return res
 
 
 class StockMove(models.Model):
