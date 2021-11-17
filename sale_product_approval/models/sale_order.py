@@ -24,11 +24,13 @@ class SaleOrder(models.Model):
     exceptions_sale_approval = fields.Boolean(
         compute="_compute_exceptions", string="Exception", default=False
     )
+    override_exception = fields.Boolean("Override Exception", default=False)
 
     @api.depends("order_line.approved_sale")
     def _compute_exceptions(self):
         self.exceptions_sale_approval = any(
-            not line.approved_sale for line in self.order_line
+            not line.approved_sale
+            for line in self.order_line.filtered(lambda x: not x.display_type)
         )
 
     def _log_exception_activity_sale(self, product_id):
@@ -50,7 +52,7 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
         for sale in self:
-            if sale.exceptions_sale_approval:
+            if sale.exceptions_sale_approval and not sale.override_exception:
                 raise UserError(
                     _(
                         "You can not confirm this sale order "
