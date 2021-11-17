@@ -10,13 +10,18 @@ from odoo.exceptions import UserError
 class MRPProduction(models.Model):
     _inherit = "mrp.production"
 
-    mo_exceptions = fields.Boolean(related="product_id.mrp_ok", string="MO Exceptions")
+    mo_exceptions = fields.Boolean(
+        related="product_id.mrp_ok",
+        string="MO Exceptions",
+        default=True,
+    )
     bom_mo_exception = fields.Boolean(
         compute="_compute_bom_exception", string="BoM Exception"
     )
     mo_line_exceptions = fields.Boolean(
         compute="_compute_mo_exceptions", string="MO Line Exceptions"
     )
+    override_exception = fields.Boolean("Override Exception", default=False)
 
     @api.depends("move_raw_ids.approved_mrp_component_ok")
     def _compute_mo_exceptions(self):
@@ -53,7 +58,11 @@ class MRPProduction(models.Model):
     def action_confirm(self):
         res = super(MRPProduction, self).action_confirm()
         for mo in self:
-            if mo.mo_line_exceptions or mo.bom_mo_exception:
+            if (
+                (mo.mo_line_exceptions or mo.bom_mo_exception)
+                and not mo.override_exception
+                and not self._context.get("override_ex")
+            ):
                 raise UserError(
                     _(
                         "You can not confirm this manufacturing order "
@@ -65,7 +74,9 @@ class MRPProduction(models.Model):
     def button_mark_done(self):
         res = super(MRPProduction, self).button_mark_done()
         for mo in self:
-            if mo.mo_line_exceptions or mo.bom_mo_exception:
+            if (
+                mo.mo_line_exceptions or mo.bom_mo_exception
+            ) and not mo.override_exception:
                 raise UserError(
                     _(
                         "You can not mark done because some products are not "
@@ -79,3 +90,6 @@ class StockMove(models.Model):
     _inherit = "stock.move"
 
     approved_mrp_component_ok = fields.Boolean(related="product_id.mrp_component_ok")
+    mrp_order_state = fields.Selection(
+        related="raw_material_production_id.state", string="MRP Order State"
+    )
