@@ -21,9 +21,18 @@
             <group name="candidate_fields" position="inside">
                 <group>
                     <separator string="Manufacturing" />
-                    <field name="candidate_manufacture" />
-                    <field name="candidate_component_manufacture" />
-                    <field name="candidate_bom" />
+                    <field
+                        name="candidate_manufacture"
+                        attrs="{'readonly': [('can_edit_candidate', '=', False)]}"
+                    />
+                    <field
+                        name="candidate_component_manufacture"
+                        attrs="{'readonly': [('can_edit_candidate', '=', False)]}"
+                    />
+                    <field
+                        name="candidate_bom"
+                        attrs="{'readonly': [('can_edit_candidate', '=', False)]}"
+                    />
                 </group>
             </group>
         </field>
