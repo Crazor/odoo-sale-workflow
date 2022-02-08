@@ -17,6 +17,13 @@ class ProductTemplate(models.Model):
         string="Candidate to be Sold",
         default=True,
     )
+    can_edit_candidate = fields.Boolean(compute="_compute_can_edit_candidate")
+
+    def _compute_can_edit_candidate(self):
+        for product in self:
+            product.can_edit_candidate = self.env.user.has_group(
+                "sale_product_approval.group_product_administrator"
+            )
 
     @api.depends("candidate_sale", "product_state_id.approved_sale")
     def _compute_sale_ok_product(self):

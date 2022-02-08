@@ -6,13 +6,14 @@
         <field name="arch" type="xml">
             <page name="inventory" position="after">
                 <page
-                    groups="sale_product_approval.group_product_administrator"
+                    groups="sale_product_approval.group_product_administrator, base.group_no_one"
                     name="states"
                     string="State Configuration"
                 >
                     <group name="candidate_fields">
                         <group string="Sales">
-                            <field name="candidate_sale" />
+                            <field name="can_edit_candidate" invisible="1" />
+                            <field name="candidate_sale" attrs="{'readonly': [('can_edit_candidate', '=', False)]}" />
                         </group>
                     </group>
                 </page>
